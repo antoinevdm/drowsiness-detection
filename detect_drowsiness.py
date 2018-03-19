@@ -13,7 +13,6 @@ import cv2
 
 def sound_alarm(path):
     # play an alarm sound
-    print("playsound")
     pygame.mixer.music.load(path)
     pygame.mixer.music.play()
 
@@ -83,13 +82,30 @@ while True:
     # detect faces in the grayscale frame
     rects = detector(gray, 0)
     # loop over the face detections
+    if len(rects) == 0:
+        # if the alarm is not on, turn it on
+        if not ALARM_ON:
+            ALARM_ON = True
+
+            # check to see if an alarm file was supplied,
+            # and if so, start a thread to have the alarm
+            # sound played in the background
+            if args["alarm"] != "":
+                t = Thread(target=sound_alarm, args=(args["alarm"],))
+                t.deamon = True
+                t.start()
+        # draw an alarm on the frame
+        cv2.putText(frame, "No face alert!", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+    else:
+        ALARM_ON = False
+
+
     for rect in rects:
         # determine the facial landmarks for the face region, then
         # convert the facial landmark (x, y)-coordinates to a NumPy
         # array
         shape = predictor(gray, rect)
         shape = face_utils.shape_to_np(shape)
-
         # extract the left and right eye coordinates, then use the
         # coordinates to compute the eye aspect ratio for both eyes
         leftEye = shape[lStart:lEnd]
