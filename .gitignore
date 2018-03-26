@@ -1,2 +1,4 @@
-.wav
-.dat
+*.wav
+*.dat
+
+presentation/output
