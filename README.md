@@ -1,6 +1,15 @@
 # drowsiness-detection
 AI project using openCV to prevent drowsiness while driving
 
+Scholar project: AI laboratory
+
+AI project using openCV to prevent drowsiness while driving.
+
+source : https://www.pyimagesearch.com/2017/05/08/drowsiness-detection-opencv/
+
+OpenCV is used for eyes and blink detection in order to prevent drowsiness.
+A
+
 
 # Project
 
@@ -46,4 +55,4 @@ https://www.researchgate.net/profile/Atul_Borkar/publication/272172830_Real_Time
 
 Implementation of Computer Vision to Detect Driver Fatigue or Drowsiness to Reduce the Chances of Vehicle Acciden
 http://sci-hub.tw/http://ieeexplore.ieee.org/abstract/document/6919054/
-
+ .wav alarm will run when the driver is closing his eyes for to long.
