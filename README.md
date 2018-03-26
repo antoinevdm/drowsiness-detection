@@ -50,6 +50,9 @@ https://link.springer.com/chapter/10.1007/978-3-642-21729-6_80
 Drowsiness detection with OpenCV
 https://www.pyimagesearch.com/2017/05/08/drowsiness-detection-opencv/
 
+Deep learning for object detection with openCV
+https://www.pyimagesearch.com/2017/08/21/deep-learning-with-opencv/
+
 Real Time Eye Blinking Detection and Tracking Using Opencv
 https://www.researchgate.net/profile/Atul_Borkar/publication/272172830_Real_Time_Eye_Blinking_Detection_and_Tracking_Using_Opencv/links/54ddc6430cf2814662eb55ff.pdf
 
