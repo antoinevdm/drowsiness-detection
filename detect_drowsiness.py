@@ -52,8 +52,10 @@ EYE_AR_CONSEC_FRAMES = 48
 
 # initialize the frame counter as well as a boolean used to
 # indicate if the alarm is going off
+COUNTER_FACE = 0
 COUNTER = 0
 ALARM_ON = False
+ALARM_ON_FACE = False
 
 # initialize dlib's face detector (HOG-based) and then create
 # the facial landmark predictor
@@ -82,22 +84,24 @@ while True:
     # detect faces in the grayscale frame
     rects = detector(gray, 0)
     # loop over the face detections
-    if len(rects) == 0:
+    if (len(rects) == 0) & (COUNTER ==0):
+        COUNTER_FACE +=1
+        if COUNTER_FACE >= EYE_AR_CONSEC_FRAMES:
         # if the alarm is not on, turn it on
-        if not ALARM_ON:
-            ALARM_ON = True
-
-            # check to see if an alarm file was supplied,
-            # and if so, start a thread to have the alarm
-            # sound played in the background
-            if args["alarm"] != "":
-                t = Thread(target=sound_alarm, args=(args["alarm"],))
-                t.deamon = True
-                t.start()
-        # draw an alarm on the frame
-        cv2.putText(frame, "No face alert!", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+            if not ALARM_ON_FACE:
+                ALARM_ON_FACE = True
+                # check to see if an alarm file was supplied,
+                # and if so, start a thread to have the alarm
+                # sound played in the background
+                if args["alarm"] != "":
+                    t = Thread(target=sound_alarm, args=(args["alarm"],))
+                    t.deamon = True
+                    t.start()
+                # draw an alarm on the frame
+            cv2.putText(frame, "No face alert!", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
     else:
-        ALARM_ON = False
+        COUNTER_FACE = 0
+        ALARM_ON_FACE = False
 
 
     for rect in rects:
