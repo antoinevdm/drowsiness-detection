@@ -59,3 +59,10 @@ https://www.researchgate.net/profile/Atul_Borkar/publication/272172830_Real_Time
 Implementation of Computer Vision to Detect Driver Fatigue or Drowsiness to Reduce the Chances of Vehicle Acciden
 http://sci-hub.tw/http://ieeexplore.ieee.org/abstract/document/6919054/
  .wav alarm will run when the driver is closing his eyes for to long.
+
+road accidents studies 
+http://www.who.int/violence_injury_prevention/publications/road_traffic/distracted_driving_en.pdf
+https://www.cdc.gov/features/dsdrowsydriving/index.html
+
+computer vision 
+https://techcrunch.com/2016/11/13/wtf-is-computer-vision/
