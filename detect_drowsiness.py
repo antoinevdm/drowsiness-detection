@@ -1,6 +1,7 @@
 # import the necessary packages
 from scipy.spatial import distance as dist
 from imutils.video import VideoStream
+from imutils.video import FPS
 from imutils import face_utils
 from threading import Thread
 import numpy as np
@@ -35,13 +36,30 @@ def eye_aspect_ratio(eye):
 pygame.init()
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
-ap.add_argument("-p", "--shape-predictor", required=True,
-help="path to facial landmark predictor")
+ap.add_argument("-s", "--shape-predictor", required=True,
+    help="path to facial landmark predictor")
 ap.add_argument("-a", "--alarm", type=str, default="",
-help="path alarm .WAV file")
+    help="path alarm .WAV file")
 ap.add_argument("-w", "--webcam", type=int, default=0,
-help="index of webcam on system")
+    help="index of webcam on system")
+ap.add_argument("-p", "--prototxt", required=True,
+    help="path to Caffe 'deploy' prototxt file")
+ap.add_argument("-m", "--model", required=True,
+    help="path to Caffe pre-trained model")
+ap.add_argument("-l", "--labels", required=True,
+    help="path to ImageNet labels (i.e., syn-sets)")
 args = vars(ap.parse_args())
+
+COUNTER_PHONE = 0
+
+# load the class labels from disk
+rows = open(args["labels"]).read().strip().split("\n")
+classes = [r[r.find(" ") + 1:].split(",")[0] for r in rows]
+
+# load our model from disk
+print("[INFO] loading model...")
+net = cv2.dnn.readNetFromCaffe(args["prototxt"], args["model"])
+fps = FPS().start()
 
 # define two constants, one for the eye aspect ratio to indicate
 # blink and then a second constant for the number of consecutive
@@ -72,9 +90,15 @@ predictor = dlib.shape_predictor(args["shape_predictor"])
 print("[INFO] starting video stream thread...")
 vs = VideoStream(src=args["webcam"]).start()
 time.sleep(1.0)
+start = time.time()
 
 # loop over frames from the video stream
 while True:
+    now = time.time()
+    if now > (start + 3):
+            start = time.time()
+            COUNTER_PHONE = 0
+
     # grab the frame from the threaded video file stream, resize
     # it, and convert it to grayscale
     # channels)
@@ -84,6 +108,44 @@ while True:
     # detect faces in the grayscale frame
     rects = detector(gray, 0)
     # loop over the face detections
+    #--------
+    (h, w) = frame.shape[:2]
+    blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)),
+        1, (224, 224), (104, 117, 123))
+
+    # pass the blob through the network and obtain the detections and
+    # predictions
+    net.setInput(blob)
+
+    detections = net.forward()
+
+    # sort the indexes of the probabilities in descending order (higher
+    # probabilitiy first) and grab the top-5 predictions
+    idxs = np.argsort(detections[0])[::-1][:5]
+
+    # # loop over the top-5 predictions and display them
+    for (i, idx) in enumerate(idxs):
+            # draw the top prediction on the input image
+            if i == 0:
+                    text = "Label: {}, {:.2f}%".format(classes[idx],
+                            detections[0][idx] * 100)
+                    # cv2.putText(image, text, (5, 25),  cv2.FONT_HERSHEY_SIMPLEX,
+                            # 0.7, (0, 0, 255), 2)
+
+            # display the predicted label + associated probability to the
+            # console
+            if classes[idx] == "cellular telephone":
+                print("Phone detected")
+                COUNTER_PHONE += 1
+
+
+    if COUNTER_PHONE == 5:
+        print("RACROHE CONNASSE!!!")
+
+        # update the FPS counter
+    fps.update()
+
+    #--------
     if (len(rects) == 0) & (COUNTER ==0):
         COUNTER_FACE +=1
         if COUNTER_FACE >= EYE_AR_CONSEC_FRAMES:
