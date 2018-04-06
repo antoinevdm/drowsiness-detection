@@ -74,6 +74,7 @@ COUNTER_FACE = 0
 COUNTER = 0
 ALARM_ON = False
 ALARM_ON_FACE = False
+ALARM_ON_PHONE = False
 
 # initialize dlib's face detector (HOG-based) and then create
 # the facial landmark predictor
@@ -90,18 +91,9 @@ predictor = dlib.shape_predictor(args["shape_predictor"])
 print("[INFO] starting video stream thread...")
 vs = VideoStream(src=args["webcam"]).start()
 time.sleep(1.0)
-start = time.time()
 
 # loop over frames from the video stream
 while True:
-    now = time.time()
-    if now > (start + 3):
-            start = time.time()
-            COUNTER_PHONE = 0
-
-    # grab the frame from the threaded video file stream, resize
-    # it, and convert it to grayscale
-    # channels)
     frame = vs.read()
     frame = imutils.resize(frame, width=450)
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -110,47 +102,15 @@ while True:
     # loop over the face detections
     #--------
     (h, w) = frame.shape[:2]
-    blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)),
-        1, (224, 224), (104, 117, 123))
-
-    # pass the blob through the network and obtain the detections and
-    # predictions
-    net.setInput(blob)
-
-    detections = net.forward()
-
-    # sort the indexes of the probabilities in descending order (higher
-    # probabilitiy first) and grab the top-5 predictions
-    idxs = np.argsort(detections[0])[::-1][:5]
-
-    # # loop over the top-5 predictions and display them
-    for (i, idx) in enumerate(idxs):
-            # draw the top prediction on the input image
-            if i == 0:
-                    text = "Label: {}, {:.2f}%".format(classes[idx],
-                            detections[0][idx] * 100)
-                    # cv2.putText(image, text, (5, 25),  cv2.FONT_HERSHEY_SIMPLEX,
-                            # 0.7, (0, 0, 255), 2)
-
-            # display the predicted label + associated probability to the
-            # console
-            if classes[idx] == "cellular telephone":
-                print("Phone detected")
-                COUNTER_PHONE += 1
-
-
-    if COUNTER_PHONE == 5:
-        print("RACROHE CONNASSE!!!")
-
-        # update the FPS counter
-    fps.update()
 
     #--------
-    if (len(rects) == 0) & (COUNTER ==0):
+    if len(rects) == 0:
         COUNTER_FACE +=1
         if COUNTER_FACE >= EYE_AR_CONSEC_FRAMES:
         # if the alarm is not on, turn it on
-            if not ALARM_ON_FACE:
+            # if not ALARM_ON_FACE:
+            if (not ALARM_ON_PHONE) & (not ALARM_ON_FACE) & (not ALARM_ON):
+                print("No face detected")
                 ALARM_ON_FACE = True
                 # check to see if an alarm file was supplied,
                 # and if so, start a thread to have the alarm
@@ -161,62 +121,112 @@ while True:
                     t.start()
                 # draw an alarm on the frame
             cv2.putText(frame, "No face alert!", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+
     else:
         COUNTER_FACE = 0
         ALARM_ON_FACE = False
 
 
-    for rect in rects:
-        # determine the facial landmarks for the face region, then
-        # convert the facial landmark (x, y)-coordinates to a NumPy
-        # array
-        shape = predictor(gray, rect)
-        shape = face_utils.shape_to_np(shape)
-        # extract the left and right eye coordinates, then use the
-        # coordinates to compute the eye aspect ratio for both eyes
-        leftEye = shape[lStart:lEnd]
-        rightEye = shape[rStart:rEnd]
-        leftEAR = eye_aspect_ratio(leftEye)
-        rightEAR = eye_aspect_ratio(rightEye)
-        # average the eye aspect ratio together for both eyes
-        ear = (leftEAR + rightEAR) / 2.0
-        # compute the convex hull for the left and right eye, then
-            # visualize each of the eyes
-        leftEyeHull = cv2.convexHull(leftEye)
-        rightEyeHull = cv2.convexHull(rightEye)
-        cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
-        cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
-        if ear < EYE_AR_THRESH:
-            COUNTER += 1
+    if (COUNTER_FACE == 0) & (COUNTER_PHONE == 0):
+        for rect in rects:
+            # determine the facial landmarks for the face region, then
+            # convert the facial landmark (x, y)-coordinates to a NumPy
+            # array
+            shape = predictor(gray, rect)
+            shape = face_utils.shape_to_np(shape)
+            # extract the left and right eye coordinates, then use the
+            # coordinates to compute the eye aspect ratio for both eyes
+            leftEye = shape[lStart:lEnd]
+            rightEye = shape[rStart:rEnd]
+            leftEAR = eye_aspect_ratio(leftEye)
+            rightEAR = eye_aspect_ratio(rightEye)
+            # average the eye aspect ratio together for both eyes
+            ear = (leftEAR + rightEAR) / 2.0
+            # compute the convex hull for the left and right eye, then
+                # visualize each of the eyes
+            leftEyeHull = cv2.convexHull(leftEye)
+            rightEyeHull = cv2.convexHull(rightEye)
+            cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
+            cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
+            if ear < EYE_AR_THRESH:
+                COUNTER += 1
 
-            # if the eyes were closed for a sufficient number of
-            # then sound the alarm
-            if COUNTER >= EYE_AR_CONSEC_FRAMES:
-                # if the alarm is not on, turn it on
-                if not ALARM_ON:
-                    ALARM_ON = True
+                # if the eyes were closed for a sufficient number of
+                # then sound the alarm
+                if COUNTER >= EYE_AR_CONSEC_FRAMES:
+                    # if the alarm is not on, turn it on
+                    if (not ALARM_ON_PHONE) & (not ALARM_ON_FACE) & (not ALARM_ON):
+                        print("Open your eyes")
+                        ALARM_ON = True
 
-                    # check to see if an alarm file was supplied,
-                    # and if so, start a thread to have the alarm
-                    # sound played in the background
-                    if args["alarm"] != "":
-                        t = Thread(target=sound_alarm, args=(args["alarm"],))
-                        t.deamon = True
-                        t.start()
+                        # check to see if an alarm file was supplied,
+                        # and if so, start a thread to have the alarm
+                        # sound played in the background
+                        if args["alarm"] != "":
+                            t = Thread(target=sound_alarm, args=(args["alarm"],))
+                            t.deamon = True
+                            t.start()
 
-                # draw an alarm on the frame
-                cv2.putText(frame, "DROWSINESS ALERT!", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+                    # draw an alarm on the frame
+                    cv2.putText(frame, "DROWSINESS ALERT!", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
-		# otherwise, the eye aspect ratio is not below the blink
-		# threshold, so reset the counter and alarm
-        else:
-            COUNTER = 0
-            ALARM_ON = False
+                    # otherwise, the eye aspect ratio is not below the blink
+                    # threshold, so reset the counter and alarm
+            else:
+                COUNTER = 0
+                ALARM_ON = False
 
-        # draw the computed eye aspect ratio on the frame to help
-        # with debugging and setting the correct eye aspect ratio
-        # thresholds and frame counters
-        cv2.putText(frame, "EAR: {:.2f}".format(ear), (300, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+            # draw the computed eye aspect ratio on the frame to help
+            # with debugging and setting the correct eye aspect ratio
+            # thresholds and frame counters
+            cv2.putText(frame, "EAR: {:.2f}".format(ear), (300, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+
+    if (COUNTER_FACE == 0) & (COUNTER == 0):
+        # grab the frame from the threaded video file stream, resize
+        # it, and convert it to grayscale
+        # channels)
+        blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)),
+            1, (224, 224), (104, 117, 123))
+
+        # pass the blob through the network and obtain the detections and
+        # predictions
+        net.setInput(blob)
+
+        detections = net.forward()
+
+        # sort the indexes of the probabilities in descending order (higher
+        # probabilitiy first) and grab the top-5 predictions
+        idxs = np.argsort(detections[0])[::-1][:10]
+        found = False
+        # # loop over the top-5 predictions and display them
+        for (i, idx) in enumerate(idxs):
+                if classes[idx] == "cellular telephone":
+                    found = True
+                    COUNTER_PHONE += 1
+
+        if not found:
+            COUNTER_PHONE = 0
+            ALARM_ON_PHONE = False
+
+
+        if COUNTER_PHONE >= 5:
+            if (not ALARM_ON_PHONE) & (not ALARM_ON_FACE) & (not ALARM_ON):
+                print("Hang-up")
+                ALARM_ON_PHONE = True
+                # check to see if an alarm file was supplied,
+                # and if so, start a thread to have the alarm
+                # sound played in the background
+                if args["alarm"] != "":
+                    t = Thread(target=sound_alarm, args=(args["alarm"],))
+                    t.deamon = True
+                    t.start()
+
+            cv2.putText(frame, "Cellphone detected", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+            # COUNTER_PHONE = 0
+            # update the FPS counter
+        fps.update()
+    else:
+        COUNTER_PHONE = 0
 
     # show the frame
     cv2.imshow("Frame", frame)

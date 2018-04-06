@@ -1,4 +1,6 @@
 *.wav
+*.mov
 *.dat
 
 presentation/output
+assets/*
