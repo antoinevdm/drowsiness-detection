@@ -1,6 +1,7 @@
 \documentclass{beamer}
 
 \usepackage{graphicx}
+\usepackage{multimedia}
 \usetheme{metropolis}           % Use metropolis theme
 
 \title{Computer vision used for alertness detection}
@@ -54,7 +55,7 @@ Sense for which it allocates the most processing power \\
 The brains paints a mental picture
 \end{frame}
 
-\begin{frame}{Computer vision: Top-down vs. Bottoms-up}
+\begin{frame}{Computer vision: Top-down vs. Bottoms-up (1)}
     \begin{itemize}
         \item Top-down approach: \textbf{Naive approach} \\
         \item Tell the computer: this is what a book looks like \\
@@ -63,7 +64,7 @@ The brains paints a mental picture
     \end{itemize}
 \end{frame}
 
-\begin{frame}{Computer vision: Top-down vs. Bottoms-up}
+\begin{frame}{Computer vision: Top-down vs. Bottoms-up (2)}
     \begin{itemize}
         \item Bottom-up approach: \textbf{Smarter approach} \\
         \item Apply transformation to objects to detect edges \\
@@ -112,21 +113,91 @@ The brains paints a mental picture
 \begin{frame}{Caffe}
     \begin{itemize}
         \item CAFFE: Convolutional Architecture for Fast Feature Embedding  \\
-            \hspace{0.27cm}\textit}
+            \hspace{0.27cm}\textit{Deep learning framework}
+        \item Open source under BSD license
+        \item Written in C++
+            \hspace{0.27cm}\textit{with a Python interface}
+        \item Lots of pre-trained model available for free
+            \hspace{0.27cm}\textit{https://github.com/BVLC/caffe}
     \end{itemize}
 \end{frame}
 
 \section{Project}
-\begin{frame}{Features}
-    Object du projet, quoi detecter
+\begin{frame}{Features (1)}
+    \begin{itemize}
+        \item Object detection:
+            \begin{itemize}
+                \item Face
+                \item Eyes
+                \item Cellphone
+            \end{itemize}
+        \item Alert on abnormal behavior
+    \end{itemize}
 \end{frame}
+
+\begin{frame}{Features (2)}
+    \begin{itemize}
+        \item Face and eyes recognition \\
+            \hspace{0.27cm}\textit{Using Top-down approach}
+    \end{itemize}
+            \begin{center}
+                \includegraphics[width=0.4\textwidth]{face.jpg}
+            \end{center}
+    \begin{itemize}
+        \item Cellphone detection \\
+            \hspace{0.27cm}\textit{Using Bottoms-up approach}
+    \end{itemize}
+\end{frame}
+
 \begin{frame}{Integration of tools}
-    Comment utliser les tools
+    \begin{itemize}
+        \item OpenCV to detect object on video stream
+        \item \textbf{.DAT} file as face landmarks
+        \item Caffe pre-trained model as cellphone detector
+        \item All included on Python simple application
+    \end{itemize}
 \end{frame}
-\begin{frame}{How does it works}
-    Comment son faites les comparaisons (bout de code ?)
+
+\begin{frame}{How does it works (1)}
+    \begin{itemize}
+        \item Attempt to detect objects on each frame:
+            \begin{enumerate}
+                \item A face
+                \item Eyes
+                \item A cellphone
+            \end{enumerate}
+        \item Face and eyes are compared with the \textbf{.DAT} file
+        \item Computing eyelids distance to detect closed eyes
+        \item Neural network to detect labeled foreign objects
+    \end{itemize}
 \end{frame}
+
+\begin{frame}{How does it works (2)}
+         Alert when:
+            \begin{itemize}
+                \item No face detected
+                \item Eyes closed for too long
+                \item Foreign object recognized as a cellphone
+            \end{itemize}
+\end{frame}
+
+\begin{frame}{Usage}
+    Python3 with options:
+    \begin{itemize}
+        \item \textbf{-s, --shape-predictor} Face landmarks (\textbf{.DAT} file)
+        \item \textbf{-p, --prototxt} Caffe \textit{deploy} prototxt file
+        \item \textbf{-m, --model} Caffe pre-trained model
+        \item \textbf{-l, --label} Text file linking Caffe labels to text
+        \item \textbf{-a, --alarm (optional)} Alarm \textbf{.WAV} file
+        \item \textbf{-w, --webcam (optional)} Index of webcam on system
+    \end{itemize}
+\end{frame}
+
 \begin{frame}{Demo}
-    Lancer la vider
+    \begin{itemize}
+        \item \textbf{Live demo}
+        \item \textbf{Video}
+\end{itemize}
 \end{frame}
+
 \end{document}
