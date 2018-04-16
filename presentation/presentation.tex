@@ -3,12 +3,132 @@
 \usepackage{graphicx}
 \usetheme{metropolis}           % Use metropolis theme
 
-\title{Computer vision used for drowsiness detection}
+\title{Computer vision used for alertness detection}
 \date{\today}
 \author{Antoine Vander Meiren \& Lorenzo Riga \& Gaetano Giordano}
 \institute{ECAM Brussels}
 
 \begin{document}
 \maketitle
-\section{}
+\begin{frame}{Driver alertness}
+Two main concerns:
+	\begin{itemize}
+        \item Driver drowsiness \footnote{source: CDC (US, 2013) }:
+    \begin{itemize}
+        \item 72,000 crashes
+        \item 44,000 injuries
+        \item 800 deaths
+    \end{itemize}
+    \item Use of self phone while driving \footnote{source: WHO (US, 2005-2007)} \\
+        \hspace{0.27cm} \textit{11\% of crashes}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Driver alertness}
+A real need to combat driver distraction \\
+through the growth of embedded technologies using:
+    \begin{itemize}
+    \item Computer vision
+    \item Neural networks
+    \end{itemize}
+\end{frame}
+
+\section{Artificial Intelligence}
+\begin{frame}{Computer vision}
+	\begin{itemize}
+	\item Recreating the human eye \\
+        \hspace{0.27cm} \textit{Modern CCD sensors more sensitive than a human eye}
+    \item Recreating the human brain to interpret the output \\
+        \hspace{0.27cm} \textit{Underlying software at the heart of computer vision}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Image interpretation}
+Our brain is built with vision in mind \\
+Sense for which it allocates the most processing power \\
+\begin{itemize}
+\item groups of neurons excite each other when contrast or motion is detected
+\item higher level neurons aggregate this in meta-patterns i.e. A circle moving upwards
+\item other groups recognize colors
+\end{itemize}
+The brains paints a mental picture
+\end{frame}
+
+\begin{frame}{Computer vision: Top-down vs. Bottoms-up}
+    \begin{itemize}
+        \item Top-down approach: \textbf{Naive approach} \\
+        \item Tell the computer: this is what a book looks like \\
+            \hspace{0.27cm} \textit{What if the book is on its side ? or the apple cut in half?} \\
+        \item Requires to store pictures of every object in every configuration and from every angle
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Computer vision: Top-down vs. Bottoms-up}
+    \begin{itemize}
+        \item Bottom-up approach: \textbf{Smarter approach} \\
+        \item Apply transformation to objects to detect edges \\
+            \hspace{0.27cm}\textit{Through math and statistics match to a trained dataset} \\
+        \item Similar to what the brain achieves
+
+\end{itemize}
+    \end{frame}
+
+\begin{frame}{Machine learning}
+    \begin{itemize}
+        \item Techniques to give computer systems the ability to ``learn''
+    \end{itemize}
+    \vspace{1cm}
+
+    ``Learning is the human process that allows us to acquire the skills necessary to adapt to the multitude of situations we encounter.'' [Japkowicz and Shah (2011)]
+
+\end{frame}
+
+\begin{frame}{Machine learning: Neural networks}
+    \begin{itemize}
+        \item Learning systems inspired by the human brain
+        \item Cluster of neurons linked together \\
+            \hspace{0.27cm}\textit{Optimized by adjusting links' weights}
+        \item Supervised learning with a labeled dataset
+    \end{itemize}
+\end{frame}
+
+\section{Tools}
+\begin{frame}{OpenCV}
+    \begin{itemize}
+        \item Open source library with thousands of algorithms for:
+        \begin{itemize}
+            \item Detect and recognize faces
+            \item Identify objects
+            \item Track movements
+            \item Etc...
+        \end{itemize}
+        \item Strong focus on real-time applications
+        \item Free for use under the open-source BSD license \footnote{License imposing minimal restrictions on the use and redistribution of covered software}
+        \item Supports deep learning frameworks \\
+            \hspace{0.27cm}\textit{TensorFlow, Torch/PyTorch and Caffe}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Caffe}
+    \begin{itemize}
+        \item CAFFE: Convolutional Architecture for Fast Feature Embedding  \\
+            \hspace{0.27cm}\textit}
+
+
+    \end{itemize}
+\end{frame}
+
+\section{Project}
+\begin{frame}{Features}
+    Object du projet, quoi detecter
+\end{frame}
+\begin{frame}{Integration of tools}
+    Comment utliser les tools
+\end{frame}
+\begin{frame}{How does it works}
+    Comment son faites les comparaisons (bout de code ?)
+\end{frame}
+\begin{frame}{Demo}
+    Lancer la vider
+\end{frame}
 \end{document}

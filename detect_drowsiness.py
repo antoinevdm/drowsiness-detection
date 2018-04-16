@@ -1,4 +1,3 @@
-# import the necessary packages
 from scipy.spatial import distance as dist
 from imutils.video import VideoStream
 from imutils.video import FPS
@@ -12,12 +11,12 @@ import time
 import dlib
 import cv2
 
-def sound_alarm(path):
-    # play an alarm sound
+# play an alarm sound
+def soundAlarm(path):
     pygame.mixer.music.load(path)
     pygame.mixer.music.play()
 
-def eye_aspect_ratio(eye):
+def eyeAspectRation(eye):
     # compute the euclidean distances between the two sets of
     # vertical eye landmarks (x, y)-coordinates
     A = dist.euclidean(eye[1], eye[5])
@@ -29,8 +28,6 @@ def eye_aspect_ratio(eye):
 
     # compute the eye aspect ratio
     ear = (A + B) / (2.0 * C)
-
-    # return the eye aspect ratio
     return ear
 
 pygame.init()
@@ -50,7 +47,6 @@ ap.add_argument("-l", "--labels", required=True,
     help="path to ImageNet labels (i.e., syn-sets)")
 args = vars(ap.parse_args())
 
-COUNTER_PHONE = 0
 
 # load the class labels from disk
 rows = open(args["labels"]).read().strip().split("\n")
@@ -70,8 +66,9 @@ EYE_AR_CONSEC_FRAMES = 48
 
 # initialize the frame counter as well as a boolean used to
 # indicate if the alarm is going off
-COUNTER_FACE = 0
 COUNTER = 0
+COUNTER_FACE = 0
+COUNTER_PHONE = 0
 ALARM_ON = False
 ALARM_ON_FACE = False
 ALARM_ON_PHONE = False
@@ -100,10 +97,9 @@ while True:
     # detect faces in the grayscale frame
     rects = detector(gray, 0)
     # loop over the face detections
-    #--------
     (h, w) = frame.shape[:2]
 
-    #--------
+    # Face detection
     if len(rects) == 0:
         COUNTER_FACE +=1
         if COUNTER_FACE >= EYE_AR_CONSEC_FRAMES:
@@ -116,30 +112,28 @@ while True:
                 # and if so, start a thread to have the alarm
                 # sound played in the background
                 if args["alarm"] != "":
-                    t = Thread(target=sound_alarm, args=(args["alarm"],))
+                    t = Thread(target=soundAlarm, args=(args["alarm"],))
                     t.deamon = True
                     t.start()
                 # draw an alarm on the frame
             cv2.putText(frame, "No face alert!", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-
     else:
         COUNTER_FACE = 0
         ALARM_ON_FACE = False
 
-
+    # Closed eyes detection
     if (COUNTER_FACE == 0) & (COUNTER_PHONE == 0):
         for rect in rects:
             # determine the facial landmarks for the face region, then
-            # convert the facial landmark (x, y)-coordinates to a NumPy
-            # array
+            # convert the facial landmark (x, y)-coordinates to a NumPy array
             shape = predictor(gray, rect)
             shape = face_utils.shape_to_np(shape)
             # extract the left and right eye coordinates, then use the
             # coordinates to compute the eye aspect ratio for both eyes
             leftEye = shape[lStart:lEnd]
             rightEye = shape[rStart:rEnd]
-            leftEAR = eye_aspect_ratio(leftEye)
-            rightEAR = eye_aspect_ratio(rightEye)
+            leftEAR = eyeAspectRation(leftEye)
+            rightEAR = eyeAspectRation(rightEye)
             # average the eye aspect ratio together for both eyes
             ear = (leftEAR + rightEAR) / 2.0
             # compute the convex hull for the left and right eye, then
@@ -150,55 +144,41 @@ while True:
             cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
             if ear < EYE_AR_THRESH:
                 COUNTER += 1
-
-                # if the eyes were closed for a sufficient number of
-                # then sound the alarm
+                # if the eyes were closed for a sufficient time
                 if COUNTER >= EYE_AR_CONSEC_FRAMES:
-                    # if the alarm is not on, turn it on
                     if (not ALARM_ON_PHONE) & (not ALARM_ON_FACE) & (not ALARM_ON):
                         print("Open your eyes")
                         ALARM_ON = True
 
-                        # check to see if an alarm file was supplied,
-                        # and if so, start a thread to have the alarm
-                        # sound played in the background
                         if args["alarm"] != "":
-                            t = Thread(target=sound_alarm, args=(args["alarm"],))
+                            t = Thread(target=soundAlarm, args=(args["alarm"],))
                             t.deamon = True
                             t.start()
 
                     # draw an alarm on the frame
                     cv2.putText(frame, "DROWSINESS ALERT!", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-
-                    # otherwise, the eye aspect ratio is not below the blink
-                    # threshold, so reset the counter and alarm
             else:
                 COUNTER = 0
                 ALARM_ON = False
 
-            # draw the computed eye aspect ratio on the frame to help
-            # with debugging and setting the correct eye aspect ratio
-            # thresholds and frame counters
+            # draw the computed eye aspect ratio on the frame to help with debugging and setting
+            # the correct eye aspect ratio thresholds and frame counters
             cv2.putText(frame, "EAR: {:.2f}".format(ear), (300, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
     if (COUNTER_FACE == 0) & (COUNTER == 0):
-        # grab the frame from the threaded video file stream, resize
-        # it, and convert it to grayscale
-        # channels)
+        # grab the frame from the threaded video file stream, resize it, and convert it to grayscale
         blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)),
             1, (224, 224), (104, 117, 123))
 
-        # pass the blob through the network and obtain the detections and
-        # predictions
+        # pass the blob through the network and obtain the detections and predictions
         net.setInput(blob)
 
         detections = net.forward()
 
-        # sort the indexes of the probabilities in descending order (higher
-        # probabilitiy first) and grab the top-5 predictions
+        # sort the indexes of the probabilities in descending probability order and grab the top-10 predictions
         idxs = np.argsort(detections[0])[::-1][:10]
         found = False
-        # # loop over the top-5 predictions and display them
+        # # loop over the top-10 predictions, looking for cellular phone
         for (i, idx) in enumerate(idxs):
                 if classes[idx] == "cellular telephone":
                     found = True
@@ -208,22 +188,17 @@ while True:
             COUNTER_PHONE = 0
             ALARM_ON_PHONE = False
 
-
         if COUNTER_PHONE >= 5:
             if (not ALARM_ON_PHONE) & (not ALARM_ON_FACE) & (not ALARM_ON):
                 print("Hang-up")
                 ALARM_ON_PHONE = True
-                # check to see if an alarm file was supplied,
-                # and if so, start a thread to have the alarm
-                # sound played in the background
+
                 if args["alarm"] != "":
-                    t = Thread(target=sound_alarm, args=(args["alarm"],))
+                    t = Thread(target=soundAlarm, args=(args["alarm"],))
                     t.deamon = True
                     t.start()
 
             cv2.putText(frame, "Cellphone detected", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-            # COUNTER_PHONE = 0
-            # update the FPS counter
         fps.update()
     else:
         COUNTER_PHONE = 0
