@@ -1,6 +1,8 @@
 *.wav
 *.mov
 *.dat
+*.jpg
+*.png
 
 presentation/output
 assets/*
