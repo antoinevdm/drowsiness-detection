@@ -20,6 +20,7 @@ def soundAlarm(path):
 def eyeAspectRation(eye):
     A = dist.euclidean(eye[1], eye[5])
     B = dist.euclidean(eye[2], eye[4])
+    C = dist.euclidean(eye[0], eye[3])
     # Compute the eye aspect ratio
     ear = (A + B) / (2.0 * C)
     return ear
@@ -152,7 +153,7 @@ while True:
         detections = net.forward()
 
         # Sort the indexes of the probabilities in descending probability order and grab the top-10 predictions
-        idxs = np.argsort(detections[0])[::-1][:10]
+        idxs = np.argsort(detections[0])[::-1][:7]
         found = False
         #  Loop over the top-10 predictions, looking for cellular phone
         for (i, idx) in enumerate(idxs):
