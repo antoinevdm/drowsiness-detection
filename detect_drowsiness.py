@@ -32,8 +32,6 @@ ap.add_argument("-s", "--shape-predictor", required=True,
     help="path to facial landmark predictor")
 ap.add_argument("-a", "--alarm", type=str, default="",
     help="path alarm .WAV file")
-ap.add_argument("-w", "--webcam", type=int, default=0,
-    help="index of webcam on system")
 ap.add_argument("-p", "--prototxt", required=True,
     help="path to Caffe 'deploy' prototxt file")
 ap.add_argument("-m", "--model", required=True,
@@ -74,7 +72,7 @@ predictor = dlib.shape_predictor(args["shape_predictor"])
 
 # Start the video stream thread
 print("[INFO] starting video stream thread...")
-vs = VideoStream(src=args["webcam"]).start()
+vs = VideoStream(0).start()
 time.sleep(1.0)
 
 # Loop over video stream's frames
