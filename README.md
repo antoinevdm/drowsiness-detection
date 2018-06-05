@@ -7,7 +7,12 @@ Caffe pre-trained model is used to detect cellphone on the frame.
 Real world problem: Driver alertness, AI can solve it!
 Perception, computer vision (OpenCV)
 
-## Links:
+## Content
+- detect_drowsiness.py: main python application
+- assets contains: wav alarm, caffe model & prototxt & labels text file, and face landmarks .dat file
+- presentation: slide show (pdf & tex), demonstration video
+
+## Links
 Computer vision
 https://techcrunch.com/2016/11/13/wtf-is-computer-vision/
 
